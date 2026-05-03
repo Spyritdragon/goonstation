@@ -301,6 +301,91 @@
 	initial_volume = 50
 	initial_reagents = list("lipolicide"=30,"chocolate"=5)
 
+/obj/item/reagent_containers/food/drinks/juicebox
+	name = "juice box"
+	desc = "A small cardboard box, purportedly containing juice."
+	icon = 'icons/obj/foodNdrink/food.dmi'
+	icon_state = "cereal_box2"
+	heal_amt = 1
+	rc_flags = RC_FULLNESS
+	initial_volume = 50
+	can_chug = 0
+	splash_all_contents = FALSE
+	incompatible_with_chem_dispensers = TRUE
+	amount_per_transfer_from_this = 0
+	initial_reagents = list("juice_orange"=50)
+	is_sealed = TRUE
+	var/obj/item/straw = null
+	var/initial_straw_taken = FALSE
+
+	examine()
+		. = ..()
+		if (!initial_straw_taken)
+			. += "There is a plastic straw stuck to it."
+		if (src.straw)
+			. += "There is a straw sticking out from the juicebox."
+		else if(!is_sealed)
+			. += "Someone has made a hole in the top."
+
+	attack_hand(mob/user)
+		if (usr.is_in_hands(src))
+			if(!initial_straw_taken)
+				boutput(user, SPAN_NOTICE("You pull off the straw stuck to the juicebox."))
+				user.put_in_hand_or_drop(new /obj/item/straw(user.loc))
+				initial_straw_taken = TRUE
+				return
+			if(src.straw)
+				boutput(user, SPAN_NOTICE("You gently remove the straw inserted into the juicebox."))
+				if (istype(user))
+					user.put_in_hand_or_drop(src.straw)
+				else
+					var/turf/T = get_turf(src)
+					src.straw.set_loc(T)
+				src.straw = null
+				return
+			boutput(user, SPAN_ALERT("Someone has already taken the straw provided with the juicebox..."))
+			return
+		..()
+
+
+
+	attack(mob/target, mob/user, def_zone, is_special = FALSE, params = null)
+		if (!src.straw)
+			boutput(user, SPAN_ALERT("There's no straw in the juicebox to drink with.")) //you numpty
+			return
+		..()
+
+	attackby(obj/item/W, mob/user, params)
+		if (istype(W, /obj/item/straw) && user)
+			if (src.straw)
+				boutput(user, SPAN_ALERT("There's already a straw in the juicebox!"))
+				return
+			if (is_sealed)
+				if (user.a_intent == "help" && prob(75))
+					boutput(user, SPAN_ALERT("You gently try to poke a hole in the juicebox, failing miserably. [pick("You pansy.",
+					"It's not that hard, is it?", "The cool kids might make fun of you now.")]"))
+					return
+				if (user.is_hulk() || (user.a_intent == "harm" && prob(20)))
+					boutput(user, SPAN_ALERT("You violently ram the straw into the juicebox, destroying both completely and splashing the contents \
+						everywhere!"))
+					src.reagents.reaction(get_turf(src))
+					src.reagents.clear_reagents()
+					qdel(W)
+					qdel(src)
+					return
+				is_sealed = FALSE
+				boutput(user, SPAN_NOTICE("You poke a hole in the juicebox and insert the straw."))
+			else
+				boutput(user, SPAN_NOTICE("You insert the straw into the juicebox."))
+			var/obj/item/straw/inserted_straw = W
+			user.u_equip(inserted_straw)
+			inserted_straw.set_loc(src)
+			src.straw = inserted_straw
+			can_chug = TRUE
+			return
+		..()
+
+
 /obj/item/reagent_containers/food/drinks/cola
 	name = "space cola"
 	desc = "Cola. in space."
@@ -365,10 +450,6 @@
 			if (!drop_this_shit) //see?
 				user.put_in_hand_or_drop(C)
 			qdel(src)
-
-	is_open_container()
-		return !is_sealed
-
 
 	proc/setup_soda() // made to be overridden, so that the Spess-Pepsi/Space-Coke debacle can continue
 		if (prob(50)) // without having to change the Space-Cola path
