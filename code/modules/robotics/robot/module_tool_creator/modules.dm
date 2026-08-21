@@ -72,6 +72,7 @@
 		/obj/item/reagent_containers/syringe,
 		/obj/item/reagent_containers/dropper,
 		/obj/item/reagent_containers/dropper/mechanical,
+		/obj/item/disk/data/tape,
 		// TODO: utility grenade fabricator?
 		// TODO: some sort of chem dispenser?
 	)
