@@ -9,6 +9,7 @@ ABSTRACT_TYPE(/obj/item/parts/robot_parts/arm)
 	accepts_normal_human_overlays = TRUE
 	var/emagged = FALSE //contains: technical debt
 	var/add_to_tools = FALSE
+	var/fits_sleeves = FALSE
 
 	New()
 		..()
@@ -176,6 +177,7 @@ ABSTRACT_TYPE(/obj/item/parts/robot_parts/arm/left)
 /obj/item/parts/robot_parts/arm/left/standard
 	name = "standard cyborg left arm"
 	breaks_cuffs = FALSE
+	fits_sleeves = TRUE
 
 	attackby(obj/item/W, mob/user)
 		if(istype(W,/obj/item/sheet))
@@ -220,6 +222,7 @@ ABSTRACT_TYPE(/obj/item/parts/robot_parts/arm/left)
 	robot_movement_modifier = /datum/movement_modifier/robot_part/light_arm_left
 	kind_of_limb = (LIMB_ROBOT | LIMB_LIGHT)
 	breaks_cuffs = FALSE
+	fits_sleeves = TRUE
 
 ABSTRACT_TYPE(/obj/item/parts/robot_parts/arm/right)
 /obj/item/parts/robot_parts/arm/right
@@ -234,6 +237,7 @@ ABSTRACT_TYPE(/obj/item/parts/robot_parts/arm/right)
 /obj/item/parts/robot_parts/arm/right/standard
 	name = "standard cyborg right arm"
 	breaks_cuffs = FALSE
+	fits_sleeves = TRUE
 
 	attackby(obj/item/W, mob/user)
 		if(istype(W,/obj/item/sheet))
@@ -278,6 +282,7 @@ ABSTRACT_TYPE(/obj/item/parts/robot_parts/arm/right)
 	robot_movement_modifier = /datum/movement_modifier/robot_part/light_arm_right
 	kind_of_limb = (LIMB_ROBOT | LIMB_LIGHT)
 	breaks_cuffs = FALSE
+	fits_sleeves = TRUE
 
 
 // ancient robot stuff
