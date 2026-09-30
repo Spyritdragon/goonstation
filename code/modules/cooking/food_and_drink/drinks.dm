@@ -326,8 +326,8 @@
 /obj/item/reagent_containers/food/drinks/juicebox
 	name = "juice box"
 	desc = "A small cardboard box, purportedly containing juice."
-	icon = 'icons/obj/foodNdrink/food.dmi'
-	icon_state = "cereal_box2"
+	icon = 'icons/obj/foodNdrink/juicebox.dmi'
+	icon_state = "juicebox-oj"
 	heal_amt = 1
 	rc_flags = RC_FULLNESS
 	initial_volume = 50
@@ -339,6 +339,12 @@
 	is_sealed = TRUE
 	var/obj/item/straw = null
 	var/initial_straw_taken = FALSE
+	var/spill_amount = 10
+
+	New()
+		..()
+		src.update_icon()
+		src.set_open_container(FALSE)
 
 	examine()
 		. = ..()
@@ -355,6 +361,7 @@
 				boutput(user, SPAN_NOTICE("You pull off the straw stuck to the juicebox."))
 				user.put_in_hand_or_drop(new /obj/item/straw(user.loc))
 				initial_straw_taken = TRUE
+				src.update_icon()
 				return
 			if(src.straw)
 				boutput(user, SPAN_NOTICE("You gently remove the straw inserted into the juicebox."))
@@ -364,6 +371,8 @@
 					var/turf/T = get_turf(src)
 					src.straw.set_loc(T)
 				src.straw = null
+				src.can_chug = FALSE
+				src.update_icon()
 				return
 			boutput(user, SPAN_ALERT("Someone has already taken the straw provided with the juicebox..."))
 			return
@@ -372,9 +381,12 @@
 
 
 	attack(mob/target, mob/user, def_zone, is_special = FALSE, params = null)
-		if (!src.straw)
-			boutput(user, SPAN_ALERT("There's no straw in the juicebox to drink with.")) //you numpty
-			return
+		if (!src.straw && prob(50))
+			// boutput(user, SPAN_ALERT("There's no straw in the juicebox to drink with.")) //you numpty
+			// return
+			boutput(user, SPAN_ALERT("Without a straw, you spill some of the drink!"))
+			src.reagents.reaction(get_turf(src), TOUCH, min(src.spill_amount, src.reagents.total_volume))
+			src.reagents.remove_any(src.spill_amount)
 		..()
 
 	attackby(obj/item/W, mob/user, params)
@@ -382,11 +394,7 @@
 			if (src.straw)
 				boutput(user, SPAN_ALERT("There's already a straw in the juicebox!"))
 				return
-			if (is_sealed)
-				if (user.a_intent == "help" && prob(75))
-					boutput(user, SPAN_ALERT("You gently try to poke a hole in the juicebox, failing miserably. [pick("You pansy.",
-					"It's not that hard, is it?", "The cool kids might make fun of you now.")]"))
-					return
+			if (src.is_sealed)
 				if (user.is_hulk() || (user.a_intent == "harm" && prob(20)))
 					boutput(user, SPAN_ALERT("You violently ram the straw into the juicebox, destroying both completely and splashing the contents \
 						everywhere!"))
@@ -395,7 +403,12 @@
 					qdel(W)
 					qdel(src)
 					return
-				is_sealed = FALSE
+				if (user.a_intent == "help" && prob(75))
+					boutput(user, SPAN_ALERT("You gently try to poke a hole in the juicebox, failing miserably. [pick("You pansy.",
+					"It's not that hard, is it?", "The cool kids might make fun of you now.")]"))
+					return
+				src.is_sealed = FALSE
+				src.set_open_container(TRUE)
 				boutput(user, SPAN_NOTICE("You poke a hole in the juicebox and insert the straw."))
 			else
 				boutput(user, SPAN_NOTICE("You insert the straw into the juicebox."))
@@ -403,8 +416,27 @@
 			user.u_equip(inserted_straw)
 			inserted_straw.set_loc(src)
 			src.straw = inserted_straw
-			can_chug = TRUE
+			src.can_chug = TRUE
+			src.update_icon()
 			return
+		if ((isscrewingtool(W) || istype(W, /obj/item/pen)) && src.is_sealed)
+			src.is_sealed = FALSE
+			src.set_open_container(TRUE)
+			boutput(user, SPAN_ALERT("You use your [W] to pry a hole in the juicebox. This feels wrong."))
+			return
+		..()
+
+	update_icon()
+		if(!src.initial_straw_taken)
+			var/image/overlay = image(src.icon, "straw-on")
+			src.UpdateOverlays(overlay, "front_straw")
+		else
+			src.ClearSpecificOverlays("front_straw")
+		if(istype(src.straw))
+			var/image/overlay = image(src.icon, "straw-in")
+			src.UpdateOverlays(overlay, "top_straw")
+		else
+			src.ClearSpecificOverlays("top_straw")
 		..()
 
 
