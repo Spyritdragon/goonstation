@@ -363,7 +363,7 @@
 				src.update_icon()
 				return
 			if(src.straw)
-				boutput(user, SPAN_NOTICE("You gently remove the straw inserted into the drinkbox."))
+				boutput(user, SPAN_NOTICE("You carefully remove the straw inserted into the drinkbox."))
 				if (istype(user))
 					user.put_in_hand_or_drop(src.straw)
 				else
@@ -439,29 +439,29 @@
 		..()
 
 /obj/item/reagent_containers/food/drinks/drinkbox/chocolate
-	name = "chocolate milk box"
+	name = "Chocolate Milk Box"
 	icon_state = "drinkbox-ch"
 	initial_reagents= list("chocolate_milk"=50)
 
 /obj/item/reagent_containers/food/drinks/drinkbox/fruit
-	name = "fruit juice box"
+	name = "Fruit Juice Box"
 
 	New()
 		switch(rand(1, 4))
 			if (1)
-				src.real_name = "Orange Juicebox"
+				src.real_name = "Orange Juice Box"
 				src.icon_state = "drinkbox-oj"
 				src.initial_reagents = list("juice_orange"=50)
 			if (2)
-				src.real_name = "Lemonade Juicebox"
+				src.real_name = "Lemonade Juice Box"
 				src.icon_state = "drinkbox-lm"
 				src.initial_reagents = list("lemonade"=50)
 			if (3)
-				src.real_name = "Apple Juicebox"
+				src.real_name = "Apple Juice Box"
 				src.icon_state = "drinkbox-ap"
 				src.initial_reagents = list("juice_apple"=50)
 			if (4)
-				src.real_name = "Pineapple Juicebox"
+				src.real_name = "Pineapple Juice Box"
 				src.icon_state = "drinkbox-pa"
 				src.initial_reagents = list("juice_pineapple"=50)
 		src.UpdateName()
