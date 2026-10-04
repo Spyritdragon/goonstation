@@ -448,6 +448,11 @@
 		else
 			return ..()
 
+/obj/item/straw/white // White straws for consistency with drinkbox sprites
+	New()
+		..()
+		src.color = rgb(255, 255, 255)
+
 /obj/item/straw/fast
 	cooldown = 0
 

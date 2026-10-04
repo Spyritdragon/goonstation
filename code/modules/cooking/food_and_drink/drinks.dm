@@ -323,18 +323,17 @@
 	initial_volume = 50
 	initial_reagents = list("lipolicide"=30,"chocolate"=5)
 
-/obj/item/reagent_containers/food/drinks/juicebox
-	name = "juice box"
-	desc = "A small cardboard box, purportedly containing juice."
-	icon = 'icons/obj/foodNdrink/juicebox.dmi'
-	icon_state = "juicebox-oj"
+/obj/item/reagent_containers/food/drinks/drinkbox
+	name = "drink box"
+	desc = "A small cardboard box, purportedly containing a drink."
+	icon = 'icons/obj/foodNdrink/drinkbox.dmi'
+	icon_state = "drinkbox-oj"
 	heal_amt = 1
 	rc_flags = RC_FULLNESS
 	initial_volume = 50
 	can_chug = 0
 	splash_all_contents = FALSE
 	incompatible_with_chem_dispensers = TRUE
-	amount_per_transfer_from_this = 0
 	initial_reagents = list("juice_orange"=50)
 	is_sealed = TRUE
 	var/obj/item/straw = null
@@ -346,25 +345,25 @@
 		src.update_icon()
 		src.set_open_container(FALSE)
 
-	examine()
+	get_desc(dist, mob/user)
 		. = ..()
 		if (!initial_straw_taken)
-			. += "There is a plastic straw stuck to it."
+			. += "<br>[SPAN_NOTICE("There is a plastic straw stuck to it.")]"
 		if (src.straw)
-			. += "There is a straw sticking out from the juicebox."
+			. += "<br>[SPAN_NOTICE("There is a straw sticking out the top.")]"
 		else if(!is_sealed)
-			. += "Someone has made a hole in the top."
+			. += "<br>[SPAN_NOTICE("Someone has made a hole in the top.")]"
 
 	attack_hand(mob/user)
 		if (usr.is_in_hands(src))
 			if(!initial_straw_taken)
-				boutput(user, SPAN_NOTICE("You pull off the straw stuck to the juicebox."))
-				user.put_in_hand_or_drop(new /obj/item/straw(user.loc))
+				boutput(user, SPAN_NOTICE("You pull off the straw stuck to the drinkbox."))
+				user.put_in_hand_or_drop(new /obj/item/straw/white(user.loc))
 				initial_straw_taken = TRUE
 				src.update_icon()
 				return
 			if(src.straw)
-				boutput(user, SPAN_NOTICE("You gently remove the straw inserted into the juicebox."))
+				boutput(user, SPAN_NOTICE("You gently remove the straw inserted into the drinkbox."))
 				if (istype(user))
 					user.put_in_hand_or_drop(src.straw)
 				else
@@ -374,16 +373,16 @@
 				src.can_chug = FALSE
 				src.update_icon()
 				return
-			boutput(user, SPAN_ALERT("Someone has already taken the straw provided with the juicebox..."))
+			boutput(user, SPAN_ALERT("Someone has already taken the straw provided with the drinkbox..."))
 			return
 		..()
 
 
 
 	attack(mob/target, mob/user, def_zone, is_special = FALSE, params = null)
+		if (is_sealed)
+			return // Sealing system sends a message after-attack so we don't have to here
 		if (!src.straw && prob(50))
-			// boutput(user, SPAN_ALERT("There's no straw in the juicebox to drink with.")) //you numpty
-			// return
 			boutput(user, SPAN_ALERT("Without a straw, you spill some of the drink!"))
 			src.reagents.reaction(get_turf(src), TOUCH, min(src.spill_amount, src.reagents.total_volume))
 			src.reagents.remove_any(src.spill_amount)
@@ -392,11 +391,11 @@
 	attackby(obj/item/W, mob/user, params)
 		if (istype(W, /obj/item/straw) && user)
 			if (src.straw)
-				boutput(user, SPAN_ALERT("There's already a straw in the juicebox!"))
+				boutput(user, SPAN_ALERT("There's already a straw in the drinkbox!"))
 				return
 			if (src.is_sealed)
 				if (user.is_hulk() || (user.a_intent == "harm" && prob(20)))
-					boutput(user, SPAN_ALERT("You violently ram the straw into the juicebox, destroying both completely and splashing the contents \
+					boutput(user, SPAN_ALERT("You violently ram the straw into the drinkbox, destroying both completely and splashing the contents \
 						everywhere!"))
 					src.reagents.reaction(get_turf(src))
 					src.reagents.clear_reagents()
@@ -404,14 +403,14 @@
 					qdel(src)
 					return
 				if (user.a_intent == "help" && prob(75))
-					boutput(user, SPAN_ALERT("You gently try to poke a hole in the juicebox, failing miserably. [pick("You pansy.",
+					boutput(user, SPAN_ALERT("You gently try to poke a hole in the drinkbox, failing miserably. [pick("You pansy.",
 					"It's not that hard, is it?", "The cool kids might make fun of you now.")]"))
 					return
 				src.is_sealed = FALSE
 				src.set_open_container(TRUE)
-				boutput(user, SPAN_NOTICE("You poke a hole in the juicebox and insert the straw."))
+				boutput(user, SPAN_NOTICE("You poke a hole in the drinkbox and insert the straw."))
 			else
-				boutput(user, SPAN_NOTICE("You insert the straw into the juicebox."))
+				boutput(user, SPAN_NOTICE("You insert the straw into the drinkbox."))
 			var/obj/item/straw/inserted_straw = W
 			user.u_equip(inserted_straw)
 			inserted_straw.set_loc(src)
@@ -422,7 +421,7 @@
 		if ((isscrewingtool(W) || istype(W, /obj/item/pen)) && src.is_sealed)
 			src.is_sealed = FALSE
 			src.set_open_container(TRUE)
-			boutput(user, SPAN_ALERT("You use your [W] to pry a hole in the juicebox. This feels wrong."))
+			boutput(user, SPAN_NOTICE("You use [W] to pry a hole in the drinkbox. This feels wrong."))
 			return
 		..()
 
@@ -438,6 +437,38 @@
 		else
 			src.ClearSpecificOverlays("top_straw")
 		..()
+
+/obj/item/reagent_containers/food/drinks/drinkbox/chocolate
+	name = "chocolate milk box"
+	icon_state = "drinkbox-ch"
+	initial_reagents= list("chocolate_milk"=50)
+
+/obj/item/reagent_containers/food/drinks/drinkbox/fruit
+	name = "fruit juice box"
+
+	New()
+		switch(rand(1, 4))
+			if (1)
+				src.real_name = "Orange Juicebox"
+				src.icon_state = "drinkbox-oj"
+				src.initial_reagents = list("juice_orange"=50)
+			if (2)
+				src.real_name = "Lemonade Juicebox"
+				src.icon_state = "drinkbox-lm"
+				src.initial_reagents = list("lemonade"=50)
+			if (3)
+				src.real_name = "Apple Juicebox"
+				src.icon_state = "drinkbox-ap"
+				src.initial_reagents = list("juice_apple"=50)
+			if (4)
+				src.real_name = "Pineapple Juicebox"
+				src.icon_state = "drinkbox-pa"
+				src.initial_reagents = list("juice_pineapple"=50)
+		src.UpdateName()
+		..()
+
+
+
 
 
 /obj/item/reagent_containers/food/drinks/cola
