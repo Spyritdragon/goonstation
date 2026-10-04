@@ -338,7 +338,7 @@
 	is_sealed = TRUE
 	var/obj/item/straw = null
 	var/initial_straw_taken = FALSE
-	var/spill_amount = 10
+	var/spill_amount = 5
 
 	New()
 		..()
@@ -382,7 +382,7 @@
 	attack(mob/target, mob/user, def_zone, is_special = FALSE, params = null)
 		if (is_sealed)
 			return // Sealing system sends a message after-attack so we don't have to here
-		if (!src.straw && prob(50))
+		if (src.reagents.total_volume > 0 && !src.straw && prob(50))
 			boutput(user, SPAN_ALERT("Without a straw, you spill some of the drink!"))
 			src.reagents.reaction(get_turf(src), TOUCH, min(src.spill_amount, src.reagents.total_volume))
 			src.reagents.remove_any(src.spill_amount)
